@@ -1,0 +1,93 @@
+<html>
+	<body>
+		<input type="button" value="start" onclick="startDrawing()">
+		<input type="button" value="stop" onclick="stopDrawing()">
+		<input type="button" value="clear" onclick="ctx.clearRect(0,0,canvas.width,canvas.height)">
+		<input type="number" id="vertices" value="4">
+		<input type="number" id="stride" value="0.5" step="0.1">
+		<canvas></canvas>
+	</body>
+	<script id="config">
+
+		canvas = document.getElementsByTagName('canvas')[0];
+		h = document.body.clientHeight;
+		w = document.body.clientWidth;
+		canvas.setAttribute("height",h);
+		canvas.setAttribute("width",w);
+		ctx = canvas.getContext('2d');
+		iterations = 10000;
+		keepDrawing = true;
+		trackerPoint = 0;
+	</script>
+	<script id = "utils">
+		randInt = function(limit){
+			limit = limit || 1000;
+			return parseInt(Math.random()*limit*10)%limit
+		}
+		randomPoint = function(){
+			return {x:randInt()%w,y:randInt()%h};
+		}
+		window.painter = {}
+		window.painter.point=function (x,y,size,color){
+			var r = size*1;
+			ctx.beginPath()
+			ctx.arc(x,y,r,0,2*Math.PI);
+			ctx.stroke();
+			if(color){
+				ctx.fillStyle = color;
+				ctx.fill();
+			}
+		}
+		window.painter.track = function(){
+				var v = vertices[randInt()%vertices.length];
+				var t = trackerPoint;
+				var Dy = v.y - t.y,Dx = v.x - t.x;
+				t = trackerPoint = {
+					x: t.x + Dx*stride,
+					y: t.y + Dy*stride
+				}
+				painter.point(t.x,t.y,1,'black');
+			}
+		startDrawing = function(){
+			setup();
+			trackerPoint = randomPoint();
+			keepDrawing = true;
+			var pulse = 5;
+			var infiloop = function(){
+				if(!keepDrawing)
+					return 
+				painter.track()
+				setTimeout(infiloop,pulse);
+				}
+
+			setTimeout(infiloop,pulse);
+			}	
+
+		stopDrawing = function(){
+			keepDrawing = false;
+		}
+
+	</script>
+	<script type="text/javascript">
+
+		setup = function(){
+			var v = document.getElementById("vertices");
+			var s = document.getElementById("stride");
+			vertices = [];
+			vertexCount = parseInt(v.value);
+			stride = parseFloat(s.value);		
+			var alpha = 2*Math.PI/vertexCount;
+			for(var i = 0 ; i < vertexCount; i++){
+				
+				var p = {
+					x: 600+250*Math.cos(alpha*i) ,
+					y: 300+250*Math.sin(-alpha*i)
+				}
+				vertices.push(p);
+				painter.point(p.x,p.y,2,'red');
+			}
+		}
+		setup();
+		
+	</script>
+</html>
